@@ -1,5 +1,6 @@
 package com.springcard.restcontroller;
 
+import com.springcard.common.CarrierServiceFactory;
 import com.springcard.exception.SystemException;
 import com.springcard.model.CarrierServiceIDS;
 import com.springcard.model.Shipment;
@@ -18,20 +19,23 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/shipments")
 public class ShipmentRestController {
 
-    private ShipmentService shipmentService;
-
     @Autowired
-    public ShipmentRestController(ShipmentService shipmentService){
-        this.shipmentService = shipmentService;
-    }
+    private CarrierServiceFactory carrierServiceFactory;
+
+    public ShipmentRestController(){}
 
     @PostMapping("/{carrierServiceId}")
     public ResponseEntity<?> createShipment(
             @PathVariable(name = "carrierServiceId") String carrierServiceId,
             @RequestBody Shipment shipment) {
         validateParams(carrierServiceId, shipment);
+        ShipmentService  shipmentService = identifyServiceType(carrierServiceId);
         shipmentService.createShipment(shipment);
         return new ResponseEntity<>("Shipment has been placed successfully", HttpStatus.CREATED);
+    }
+
+    ShipmentService identifyServiceType(String carrierServiceId) {
+        return CarrierServiceFactory.getService(CarrierServiceIDS.carrierServiceIDSValue(carrierServiceId).getCarrierServiceType());
     }
 
     private void validateParams(String carrierServiceId, Shipment shipment) {
@@ -43,7 +47,6 @@ public class ShipmentRestController {
         if (shipment == null || shipment.getPackageDetails() == null ||
                 shipment.getPackageDetails().getSkuId() == null)
             throw new SystemException("Shipment info isn't provided!", SystemException.ErrorCode.NULL_PROPERTY);
-
     }
 
 

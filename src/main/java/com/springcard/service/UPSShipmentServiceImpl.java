@@ -1,9 +1,11 @@
 package com.springcard.service;
 
+import com.springcard.common.CarrierServiceType;
 import com.springcard.exception.SystemException;
 import com.springcard.model.Shipment;
 import com.springcard.repository.ShipmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -11,7 +13,8 @@ import java.util.UUID;
 
 
 @Service
-public class ShipmentServiceImpl implements ShipmentService {
+@Qualifier("uPSShipmentService")
+public class UPSShipmentServiceImpl implements ShipmentService {
 
     @Autowired
     private ShipmentRepository shipmentRepository;
@@ -27,5 +30,10 @@ public class ShipmentServiceImpl implements ShipmentService {
        shipment.setUuid(UUID.randomUUID());
        shipment.setCreationDate(LocalDateTime.now());
        shipmentRepository.save(shipment);
+    }
+
+    @Override
+    public CarrierServiceType getType() {
+        return CarrierServiceType.UPS;
     }
 }
